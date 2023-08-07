@@ -6,12 +6,28 @@ import SearchIcon from "@mui/icons-material/Search";
 import { logo } from "../../assets/index";
 import { allItems } from '../../constants';
 import HeaderBottom from './HeaderBottom';
+import LououtIcon from "@mui/icons-material/Logout";
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector,useDispatch } from 'react-redux';
+import {getAuth, signOut} from "firebase/auth";
+import { userSignOut } from '../../redux/amazonSlice';
 
 export default function header() {
+  const auth = getAuth();
+  const dispatch = useDispatch()
   const [showAll, setShowAll] = useState(false);
   const products = useSelector((state)=> state.amazon.products);
+  const userInfo = useSelector((state)=> state.amazon.userInfo);
+
+  const handleLogout=()=>{
+    signOut(auth)
+    .then(()=>{
+      dispatch(userSignOut())
+    })
+    .catch((error)=>{
+
+    });
+  }
 
   return (
     <div className='w-full sticky top-0 z-50'>
@@ -67,7 +83,12 @@ export default function header() {
 
         <Link to="/sigin">
         <div className='flex flex-col items-start justify-center headerHover'>
-          <p className='text-sm mdl:text-xs text-white mdl:text-lightText font-light'>Hello, sign in</p>
+                  {userInfo ? (
+                    <p className='text-sm text-gray-100 font-medium'>{userInfo.userName}</p>
+                  ):(
+                    <p className='text-sm mdl:text-xs text-white mdl:text-lightText font-light'>Hello, sign in</p>
+                  )}
+          
           <p className='text-sm font-semibold -mt-1 text-whiteText hidden mdl:inline-flex'
           >Account & Lists{" "}
             <span><ArrowDropDownOutlinedIcon /></span></p>
@@ -92,6 +113,14 @@ export default function header() {
           </span></p>
         </div>
         </Link>
+        {userInfo &&(
+          <div onClick={handleLogout} className='flex flex-col justify-center items-center headerHover relative'>
+            <LououtIcon/>
+            <p className='hidden mdl:inline-flex text-xs font-semibold text-whiteText'>
+              Log out
+            </p>
+          </div>
+        )}
 
         {/* ===== Cart End  ===== */}
       </div>

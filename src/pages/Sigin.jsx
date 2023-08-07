@@ -4,10 +4,13 @@ import {darkLogo} from "../assets/index"
 import {Link, useNavigate} from 'react-router-dom';
 import {getAuth, signInWithEmailAndPassword} from "firebase/auth";
 import {RotatingLines} from "react-loader-spinner";
+import {useDispatch} from "react-redux";
+import { setUserInfo } from '../redux/amazonSlice';
 
 const Sigin = () => {
   const auth = getAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email,setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errEmail, setErrEmail] = useState("");
@@ -38,6 +41,11 @@ const Sigin = () => {
       setLoading(true)
       signInWithEmailAndPassword(auth,email,password)
         .then((userCredential)=>{
+          const user = userCredential.user;
+          dispatch(setUserInfo({
+            _id:user.uid,
+            userName:user.displayName,
+          }))
           setLoading(false)
           setSuccessMsg("Logged in Successfully! Welcome you back!");
           setTimeout(()=>{
